@@ -6,7 +6,7 @@ arr = [(a[i], i+1) for i in range(n)]
 arr.sort()  
 
 for i in range(n):
-    target = target1 - arr[i][0]
+    target = target1 - arr[i][0] #calculate the target for the two-pointer search
     left = i + 1
     right = n - 1
 
