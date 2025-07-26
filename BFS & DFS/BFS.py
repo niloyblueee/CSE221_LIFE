@@ -1,50 +1,64 @@
+# import collections # Removed as per your request
+
 def bfs(graph, start_node):
     """
-    Performs a Breadth-First Search (BFS) on a graph without using collections.deque.
+    Performs a Breadth-First Search (BFS) on a graph.
 
     Args:
         graph (dict): An adjacency list representation of the graph.
-        start_node: The node from which to start the BFS.
+                      Keys are nodes, and values are lists of adjacent nodes.
+                      Example: {'A': ['B', 'C'], 'B': ['D'], 'C': ['E'], 'D': [], 'E': []}
+        start_node: The starting node for the BFS.
 
     Returns:
-        list: A list representing the order in which nodes were visited.
+        tuple: A tuple containing two dictionaries:
+               - distances (dict): Stores the shortest distance from the start_node to each node.
+               - predecessors (dict): Stores the predecessor of each node in the BFS path.
     """
-    visited = set()
-    queue = [] # Using a standard Python list as a queue
-    traversal_order = []
 
-    # Enqueue the start node and mark as visited
-    queue.append(start_node)
-    visited.add(start_node)
+    # Initialize vertices:
+    # 'color' tracks the state of the node (WHITE: unvisited, GREY: visited but neighbors not explored, BLACK: visited and neighbors explored)
+    # 'd' stores the distance from the start_node
+    # 'p' stores the predecessor node in the BFS path
+    colors = {node: 'WHITE' for node in graph}
+    distances = {node: float('inf') for node in graph}
+    predecessors = {node: None for node in graph}
 
-    while queue:
-        # Dequeue the current node from the front of the list
-        # WARNING: list.pop(0) is O(n) operation, making this less efficient for large graphs.
-        current_node = queue.pop(0)
-        traversal_order.append(current_node)
+    # Initialize Q (Queue) with the start_node
+    # Using a standard list as a queue. Note: list.pop(0) is less efficient than collections.deque.popleft()
+    q = [] 
 
-        # Explore neighbors
-        for neighbor in graph.get(current_node, []): 
-            """"The dict.get() method in Python is a safe way to 
-            access dictionary values. When you call graph.get(current_node, []):
-            
-            > If current_node exists as a key in graph: The method returns the list of 
-            neighbors associated with that current_node. For example,
-            if graph = {'A': ['B', 'C']} and current_node is 'A', it will return ['B', 'C'].
+    # Set initial properties for the start_node
+    colors[start_node] = 'GREY'
+    distances[start_node] = 0
+    q.append(start_node)
 
-            > If current_node does NOT exist as a key in graph: 
-            Instead of raising a KeyError (which graph[current_node] would do),
-              get() returns the specified default value, which in this case is an empty list []."""
+    # While Q is not empty
+    while q:
+        # u = RemoveTop(Q) - Get the node from the front of the queue
+        u = q.pop(0) # Using pop(0) for list to simulate deque.popleft()
 
-            if neighbor not in visited:
-                visited.add(neighbor)
-                queue.append(neighbor) # Enqueue neighbor to the back of the list
-    
-    return traversal_order
+        # For each v in u->adj (for each neighbor of u)
+        for v in graph.get(u, []):  # .get(u, []) handles cases where a node might not have neighbors
+            if colors[v] == 'WHITE':
+                # v->color = GREY - Mark neighbor as visited
+                colors[v] = 'GREY'
+                # v->d = u->d + 1 - Update distance
+                distances[v] = distances[u] + 1
+                # v->p = u - Set predecessor
+                predecessors[v] = u
+                # Enqueue(Q, v) - Add neighbor to the queue
+                q.append(v)
+        
+        # u->color = BLACK - Mark u as fully explored
+        colors[u] = 'BLACK'
+
+    return distances, predecessors
 
 # --- Example Usage ---
 if __name__ == "__main__":
-    graph = {
+    # Define a sample graph using an adjacency list
+    sample_graph = {
         'A': ['B', 'C'],
         'B': ['D', 'E'],
         'C': ['F'],
@@ -52,13 +66,30 @@ if __name__ == "__main__":
         'E': ['F'],
         'F': []
     }
-    
-    print(f"BFS traversal (no deque) starting from 'A': {bfs(graph, 'A')}") # Expected: ['A', 'B', 'C', 'D', 'E', 'F']
 
-    graph_cycled = {
-        '0': ['1', '2'],
-        '1': ['2'],
-        '2': ['0', '3'],
-        '3': ['3']
-    }
-    print(f"BFS traversal (no deque) starting from '2': {bfs(graph_cycled, '2')}") # Expected: ['2', '0', '3', '1']
+    start_node = 'A'
+    print(f"Performing BFS starting from node: {start_node}")
+    
+    # Run BFS
+    dist, pred = bfs(sample_graph, start_node)
+
+    print("\nDistances from start node:")
+    for node, distance in dist.items():
+        print(f"  {node}: {distance}")
+
+    print("\nPredecessors in BFS path:")
+    for node, predecessor in pred.items():
+        print(f"  {node}: {predecessor}")
+
+    # Another example with a disconnected graph or different start
+    print("\n--- Another Example (starting from 'C') ---")
+    start_node_2 = 'C'
+    dist2, pred2 = bfs(sample_graph, start_node_2)
+    print(f"Performing BFS starting from node: {start_node_2}")
+    print("\nDistances from start node:")
+    for node, distance in dist2.items():
+        print(f"  {node}: {distance}")
+
+    print("\nPredecessors in BFS path:")
+    for node, predecessor in pred2.items():
+        print(f"  {node}: {predecessor}")
