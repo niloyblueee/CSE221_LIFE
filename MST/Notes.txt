@@ -1,0 +1,12 @@
+MST
+
+NON WEIGHTED
+number of spanning tee possible from graph = Edge C (vertices - 1 ) - number of Cycles
+#example
+6 edges 
+1 Cycle
+vertices 5
+number of spanning tee possible from graph =>  6C4 - 1
+
+
+WEIGHTED
